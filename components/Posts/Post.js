@@ -10,6 +10,41 @@ const PostContainer = styled.div(() => ({
   overflow: 'hidden',
 }));
 
+const AvatarContainer = styled.div(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: '10px',
+}));
+
+const Avatar = styled.div(() => ({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  backgroundColor: '#888',
+  color: '#fff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  marginRight: '10px',
+}));
+
+const UserInfo = styled.div(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+}));
+
+const UserName = styled.div(() => ({
+  fontSize: '16px',
+  fontWeight: 'bold',
+}));
+
+const UserEmail = styled.div(() => ({
+  fontSize: '14px',
+  color: '#555',
+}));
+
 const CarouselContainer = styled.div(() => ({
   position: 'relative',
 }));
@@ -22,7 +57,6 @@ const Carousel = styled.div(() => ({
   '&::-webkit-scrollbar': {
     display: 'none',
   },
-  position: 'relative',
 }));
 
 const CarouselItem = styled.div(() => ({
@@ -46,13 +80,17 @@ const Content = styled.div(() => ({
 
 const Button = styled.button(() => ({
   position: 'absolute',
-  bottom: 0,
+  top: '50%',
+  transform: 'translateY(-50%)',
   backgroundColor: 'rgba(255, 255, 255, 0.5)',
   border: 'none',
   color: '#000',
   fontSize: '20px',
   cursor: 'pointer',
   height: '50px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 }));
 
 const PrevButton = styled(Button)`
@@ -68,8 +106,9 @@ const Post = ({ post }) => {
 
   const handleNextClick = () => {
     if (carouselRef.current) {
+      const imageWidth = carouselRef.current.firstChild.offsetWidth;
       carouselRef.current.scrollBy({
-        left: 50,
+        left: imageWidth,
         behavior: 'smooth',
       });
     }
@@ -77,15 +116,32 @@ const Post = ({ post }) => {
 
   const handlePrevClick = () => {
     if (carouselRef.current) {
+      const imageWidth = carouselRef.current.firstChild.offsetWidth;
       carouselRef.current.scrollBy({
-        left: -70,
+        left: -imageWidth,
         behavior: 'smooth',
       });
     }
   };
 
+  const getInitials = (name) => {
+    if (typeof name !== 'string' || !name.trim()) return '';
+    const names = name.split(' ');
+    const initials = `${names[0]?.charAt(0) || ''}${names[1]?.charAt(0) || ''}`;
+    return initials.toUpperCase();
+  };
+
+  const initials = getInitials(post.userName);
+
   return (
     <PostContainer>
+      <AvatarContainer>
+        <Avatar>{initials}</Avatar>
+        <UserInfo>
+          <UserName>{post.userName}</UserName>
+          <UserEmail>{post.userEmail}</UserEmail>
+        </UserInfo>
+      </AvatarContainer>
       <CarouselContainer>
         <Carousel ref={carouselRef}>
           {post.images.map((image, index) => (
@@ -107,12 +163,16 @@ const Post = ({ post }) => {
 
 Post.propTypes = {
   post: PropTypes.shape({
-    content: PropTypes.any,
-    images: PropTypes.shape({
-      map: PropTypes.func,
-    }),
-    title: PropTypes.any,
-  }),
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        url: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    userName: PropTypes.string.isRequired,
+    userEmail: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Post;
